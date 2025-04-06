@@ -7,11 +7,13 @@ import {
   MessageSquare, 
   Settings, 
   Share2, 
-  Users
+  Users,
+  FileText
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import ChatInterface from "@/components/ChatInterface";
 import { Separator } from "@/components/ui/separator";
+import PostFeed from "@/components/PostFeed";
 
 // Demo community data
 const communities = [
@@ -66,6 +68,43 @@ const communities = [
   // Add more communities as needed
 ];
 
+// Sample posts for demo
+const samplePosts = [
+  {
+    id: 1,
+    author: {
+      name: "Alex Turner",
+      initials: "AT",
+    },
+    content: "Just discovered this amazing jazz album from the 70s. Anyone else into vintage jazz? Would love some recommendations!",
+    createdAt: "2025-04-05T14:30:00Z",
+    likes: 24,
+    comments: 7,
+  },
+  {
+    id: 2,
+    author: {
+      name: "Maria Rodriguez",
+      initials: "MR",
+    },
+    content: "Hey everyone! I'm organizing a virtual concert next week. We'll be featuring indie artists from around the world. Drop a comment if you're interested in performing or attending!",
+    createdAt: "2025-04-04T09:15:00Z",
+    likes: 42,
+    comments: 15,
+  },
+  {
+    id: 3,
+    author: {
+      name: "Jamie Oliver",
+      initials: "JO",
+    },
+    content: "What's on your playlist this weekend? I'm looking for some fresh tracks to add to mine.",
+    createdAt: "2025-04-03T18:45:00Z",
+    likes: 18,
+    comments: 23,
+  }
+];
+
 const CommunityPage = () => {
   const { id } = useParams<{ id: string }>();
   const communityId = parseInt(id || "1");
@@ -102,8 +141,12 @@ const CommunityPage = () => {
         </div>
         
         {/* Community Content */}
-        <Tabs defaultValue="chat" className="w-full">
+        <Tabs defaultValue="posts" className="w-full">
           <TabsList className="w-full justify-start bg-white dark:bg-gray-800 border">
+            <TabsTrigger value="posts" className="flex items-center">
+              <FileText className="h-4 w-4 mr-2" />
+              Posts
+            </TabsTrigger>
             <TabsTrigger value="chat" className="flex items-center">
               <MessageSquare className="h-4 w-4 mr-2" />
               Chat
@@ -121,6 +164,10 @@ const CommunityPage = () => {
               Settings
             </TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="posts" className="border rounded-lg p-6">
+            <PostFeed communityId={community.id} initialPosts={samplePosts} />
+          </TabsContent>
           
           <TabsContent value="chat" className="border rounded-lg overflow-hidden h-[calc(100vh-300px)]">
             <ChatInterface 

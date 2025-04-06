@@ -30,7 +30,7 @@ const Navbar = () => {
               <Users className="h-6 w-6 text-white" />
             </div>
             <span className="text-xl font-bold tracking-tight hidden md:inline-flex">
-              CommunitySpark
+              ComuChat
             </span>
           </Link>
         </div>

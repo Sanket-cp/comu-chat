@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Ambulance, Police, Loader2, MapPin } from "lucide-react";
+import { Ambulance, ShieldAlert, Loader2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -182,7 +182,7 @@ const EmergencyServices = () => {
 
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <Police className="h-5 w-5 text-blue-500" />
+                <ShieldAlert className="h-5 w-5 text-blue-500" />
                 <h3 className="font-medium">Nearby Police Stations</h3>
               </div>
               <div className="grid gap-3">

@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import CommunitySidebar from "@/components/CommunitySidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useEffect } from "react";
+import SafetyButton from "@/components/SafetyButton";
 
 const MainLayout = () => {
   useEffect(() => {
@@ -19,6 +20,7 @@ const MainLayout = () => {
           <main className="min-h-[calc(100vh-4rem)]">
             <Outlet />
           </main>
+          <SafetyButton />
         </div>
       </div>
     </SidebarProvider>

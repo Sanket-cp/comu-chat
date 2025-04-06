@@ -1,8 +1,9 @@
-# Welcome to your Lovable project
+
+# Welcome to ComuChat
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/a720b280-4459-4343-8b15-4490edcb6903
+**URL**: https://comuchat.app
 
 ## How can I edit this code?
 
@@ -64,7 +65,7 @@ This project is built with:
 
 Simply open [Lovable](https://lovable.dev/projects/a720b280-4459-4343-8b15-4490edcb6903) and click on Share -> Publish.
 
-## Can I connect a custom domain to my Lovable project?
+## Can I connect a custom domain to my ComuChat project?
 
 Yes it is!
 

@@ -9,10 +9,48 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { useToast } from "@/hooks/use-toast";
 
 const Navbar = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/discover?search=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery("");
+      setIsSearchOpen(false);
+    }
+  };
+
+  const handleQuickSearch = (term: string) => {
+    navigate(`/discover?search=${encodeURIComponent(term)}`);
+    setIsSearchOpen(false);
+    toast({
+      title: "Searching for communities",
+      description: `Showing results for "${term}"`,
+    });
+  };
+
   return (
     <nav className="border-b bg-white dark:bg-gray-900 w-full sticky top-0 z-50">
       <div className="flex items-center justify-between h-16 px-4 md:px-6">
@@ -36,14 +74,16 @@ const Navbar = () => {
         </div>
         
         <div className="flex-1 mx-4 max-w-md hidden md:block">
-          <div className="relative">
+          <form onSubmit={handleSearch} className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               className="pl-10 bg-muted/50 border-none"
               placeholder="Search communities..."
               type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-          </div>
+          </form>
         </div>
         
         <div className="flex items-center gap-2">
@@ -53,9 +93,48 @@ const Navbar = () => {
             </Button>
           </Link>
           
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Search className="h-5 w-5" />
-          </Button>
+          <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Search className="h-5 w-5" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="p-0">
+              <Command>
+                <CommandInput 
+                  placeholder="Search communities..." 
+                  value={searchQuery}
+                  onValueChange={setSearchQuery}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && searchQuery.trim()) {
+                      e.preventDefault();
+                      handleQuickSearch(searchQuery);
+                    }
+                  }}
+                />
+                <CommandList>
+                  <CommandEmpty>No results found.</CommandEmpty>
+                  <CommandGroup heading="Popular searches">
+                    <CommandItem onSelect={() => handleQuickSearch("Music")}>
+                      🎵 Music
+                    </CommandItem>
+                    <CommandItem onSelect={() => handleQuickSearch("Food")}>
+                      🍔 Food
+                    </CommandItem>
+                    <CommandItem onSelect={() => handleQuickSearch("Tech")}>
+                      💻 Technology
+                    </CommandItem>
+                    <CommandItem onSelect={() => handleQuickSearch("Books")}>
+                      📚 Books
+                    </CommandItem>
+                    <CommandItem onSelect={() => handleQuickSearch("Fitness")}>
+                      🏋️ Fitness
+                    </CommandItem>
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </DialogContent>
+          </Dialog>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import PostCard from "@/components/PostCard";
 import CreatePostForm from "@/components/CreatePostForm";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Post {
   id: number;
@@ -11,6 +12,7 @@ interface Post {
     initials: string;
   };
   content: string;
+  image?: string;
   createdAt: string;
   likes: number;
   comments: number;
@@ -24,15 +26,18 @@ interface PostFeedProps {
 
 const PostFeed = ({ communityId, initialPosts }: PostFeedProps) => {
   const [posts, setPosts] = useState<Post[]>(initialPosts);
+  const { user } = useAuth();
 
-  const handlePostSubmit = (content: string) => {
+  const handlePostSubmit = (content: string, image?: string) => {
     const newPost: Post = {
       id: Date.now(),
       author: {
-        name: "You",
-        initials: "GU",
+        name: user?.name || "You",
+        avatar: user?.avatar,
+        initials: user?.name ? user.name.substring(0, 2).toUpperCase() : "GU",
       },
       content,
+      image,
       createdAt: new Date().toISOString(),
       likes: 0,
       comments: 0,

@@ -8,6 +8,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface Comment {
   id: number;
@@ -50,9 +51,19 @@ const PostCard = ({
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<Comment[]>([]);
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
 
   const handleLike = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to like posts",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (isLiked) {
       setLikeCount(prev => prev - 1);
     } else {
@@ -66,6 +77,15 @@ const PostCard = ({
   };
 
   const handleAddComment = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to comment",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (commentText.trim() && user) {
       const newComment = {
         id: Date.now(),
@@ -79,6 +99,10 @@ const PostCard = ({
       };
       setComments([...comments, newComment]);
       setCommentText("");
+      toast({
+        title: "Comment added",
+        description: "Your comment has been posted successfully",
+      });
     }
   };
 
@@ -190,16 +214,17 @@ const PostCard = ({
             </Avatar>
             <div className="flex-1 flex items-center space-x-2">
               <Textarea
-                placeholder="Write a comment..."
+                placeholder={isAuthenticated ? "Write a comment..." : "Log in to comment"}
                 className="min-h-0 h-10 py-2 resize-none focus-visible:ring-community-purple"
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
+                disabled={!isAuthenticated}
               />
               <Button 
                 size="icon" 
                 className="h-8 w-8 bg-community-purple hover:bg-community-darkPurple"
                 onClick={handleAddComment}
-                disabled={!commentText.trim()}
+                disabled={!isAuthenticated || !commentText.trim()}
               >
                 <Send className="h-4 w-4" />
               </Button>

@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { Image, Send, X } from "lucide-react";
+import { Image, Send, X, LogIn } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 interface CreatePostFormProps {
   onPostSubmit: (content: string, image?: string) => void;
@@ -17,19 +18,40 @@ const CreatePostForm = ({ onPostSubmit, communityId }: CreatePostFormProps) => {
   const [content, setContent] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to create a post",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (content.trim() || selectedImage) {
       onPostSubmit(content, selectedImage || undefined);
       setContent("");
       setSelectedImage(null);
+      toast({
+        title: "Post created",
+        description: "Your post has been published successfully"
+      });
     }
   };
 
   const handleImageSelect = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to add images",
+        variant: "destructive"
+      });
+      return;
+    }
     fileInputRef.current?.click();
   };
 
@@ -59,6 +81,25 @@ const CreatePostForm = ({ onPostSubmit, communityId }: CreatePostFormProps) => {
       fileInputRef.current.value = "";
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <Card className="mb-6">
+        <CardContent className="pt-6 pb-6 text-center">
+          <div className="flex flex-col items-center justify-center gap-4">
+            <h3 className="text-lg font-medium">Join the conversation</h3>
+            <p className="text-muted-foreground">Sign in to post and interact with the community</p>
+            <Button className="bg-community-purple hover:bg-community-darkPurple mt-2" asChild>
+              <Link to="/login">
+                <LogIn className="h-4 w-4 mr-2" />
+                Sign in to post
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="mb-6">

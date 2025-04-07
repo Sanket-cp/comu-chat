@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface User {
   id: string;
@@ -21,6 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const { toast } = useToast();
 
   // Check if user is already logged in on initial load
   useEffect(() => {
@@ -38,36 +40,92 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // This would normally validate with a backend
-    // For demo purposes, we'll just check if email contains "@" and password is not empty
-    if (email.includes("@") && password.length > 0) {
-      const newUser = {
-        id: `user-${Date.now()}`,
-        name: email.split("@")[0],
-        email,
+    // Get stored users from localStorage
+    const storedUsers = localStorage.getItem("users") || "[]";
+    const users = JSON.parse(storedUsers);
+    
+    // Find user with matching email
+    const userMatch = users.find((u: any) => u.email === email);
+    
+    if (userMatch && userMatch.password === password) {
+      // Successful login
+      const loggedInUser = {
+        id: userMatch.id,
+        name: userMatch.name,
+        email: userMatch.email,
       };
-      setUser(newUser);
+      
+      setUser(loggedInUser);
       setIsAuthenticated(true);
-      localStorage.setItem("user", JSON.stringify(newUser));
+      localStorage.setItem("user", JSON.stringify(loggedInUser));
+      
+      toast({
+        title: "Login successful",
+        description: `Welcome back, ${loggedInUser.name}!`,
+      });
+      
       return true;
     }
+    
+    // Failed login
+    toast({
+      title: "Login failed",
+      description: "Invalid email or password",
+      variant: "destructive"
+    });
+    
     return false;
   };
 
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
-    // This would normally register with a backend
-    if (name && email.includes("@") && password.length > 0) {
-      const newUser = {
-        id: `user-${Date.now()}`,
-        name,
-        email,
-      };
-      setUser(newUser);
-      setIsAuthenticated(true);
-      localStorage.setItem("user", JSON.stringify(newUser));
-      return true;
+    if (!name || !email.includes("@") || password.length < 6) {
+      toast({
+        title: "Registration failed",
+        description: "Please provide a valid name, email, and password (min 6 characters)",
+        variant: "destructive"
+      });
+      return false;
     }
-    return false;
+    
+    // Get existing users
+    const storedUsers = localStorage.getItem("users") || "[]";
+    const users = JSON.parse(storedUsers);
+    
+    // Check if email already exists
+    if (users.some((user: any) => user.email === email)) {
+      toast({
+        title: "Registration failed",
+        description: "Email already in use",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    // Create new user
+    const newUser = {
+      id: `user-${Date.now()}`,
+      name,
+      email,
+      password, // Store password for validation (in a real app, this would be hashed)
+      createdAt: new Date().toISOString()
+    };
+    
+    // Add user to users array and save
+    users.push(newUser);
+    localStorage.setItem("users", JSON.stringify(users));
+    
+    // Auto login after registration
+    const loggedInUser = {
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+    };
+    
+    setUser(loggedInUser);
+    setIsAuthenticated(true);
+    localStorage.setItem("user", JSON.stringify(loggedInUser));
+    
+    return true;
   };
 
   const logout = () => {

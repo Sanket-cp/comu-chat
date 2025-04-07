@@ -1,3 +1,4 @@
+
 import { Bell, Home, Menu, Search, Users, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +11,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link, useNavigate } from "react-router-dom";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -27,12 +28,38 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
+// Popular search suggestions
+const popularSearches = [
+  { name: "Music Lovers", emoji: "🎵", term: "Music" },
+  { name: "Foodies United", emoji: "🍔", term: "Food" },
+  { name: "Tech Talk", emoji: "💻", term: "Technology" },
+  { name: "Book Club", emoji: "📚", term: "Books" },
+  { name: "Fitness Group", emoji: "🏋️", term: "Fitness" },
+  { name: "Travel Enthusiasts", emoji: "✈️", term: "Travel" },
+  { name: "Art & Design", emoji: "🎨", term: "Art" },
+  { name: "Gaming Hub", emoji: "🎮", term: "Gaming" },
+];
+
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchSuggestions, setSearchSuggestions] = useState(popularSearches);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, isAuthenticated, logout } = useAuth();
+
+  // Filter search suggestions based on query
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      const filtered = popularSearches.filter(item => 
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.term.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setSearchSuggestions(filtered);
+    } else {
+      setSearchSuggestions(popularSearches);
+    }
+  }, [searchQuery]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,6 +123,25 @@ const Navbar = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+            {searchQuery.trim() && (
+              <div className="absolute w-full mt-1 bg-white dark:bg-gray-800 rounded-md shadow-lg border z-10">
+                <ul className="py-2">
+                  {searchSuggestions.map((item, index) => (
+                    <li 
+                      key={index}
+                      className="px-4 py-2 hover:bg-muted cursor-pointer flex items-center"
+                      onClick={() => handleQuickSearch(item.term)}
+                    >
+                      <span className="mr-2">{item.emoji}</span>
+                      <span>{item.name}</span>
+                    </li>
+                  ))}
+                  {searchSuggestions.length === 0 && (
+                    <li className="px-4 py-2 text-muted-foreground">No suggestions found</li>
+                  )}
+                </ul>
+              </div>
+            )}
           </form>
         </div>
         
@@ -128,21 +174,11 @@ const Navbar = () => {
                 <CommandList>
                   <CommandEmpty>No results found.</CommandEmpty>
                   <CommandGroup heading="Popular searches">
-                    <CommandItem onSelect={() => handleQuickSearch("Music")}>
-                      🎵 Music
-                    </CommandItem>
-                    <CommandItem onSelect={() => handleQuickSearch("Food")}>
-                      🍔 Food
-                    </CommandItem>
-                    <CommandItem onSelect={() => handleQuickSearch("Tech")}>
-                      💻 Technology
-                    </CommandItem>
-                    <CommandItem onSelect={() => handleQuickSearch("Books")}>
-                      📚 Books
-                    </CommandItem>
-                    <CommandItem onSelect={() => handleQuickSearch("Fitness")}>
-                      🏋️ Fitness
-                    </CommandItem>
+                    {searchSuggestions.map((item, index) => (
+                      <CommandItem key={index} onSelect={() => handleQuickSearch(item.term)}>
+                        {item.emoji} {item.name}
+                      </CommandItem>
+                    ))}
                   </CommandGroup>
                 </CommandList>
               </Command>

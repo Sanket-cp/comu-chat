@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Smile, Video, Bot, HelpCircle } from "lucide-react";
 import ChatMessage from "./ChatMessage";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Message {
   id: number;
@@ -22,6 +23,7 @@ interface ChatInterfaceProps {
 }
 
 const ChatInterface = ({ communityId, communityName }: ChatInterfaceProps) => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -48,7 +50,7 @@ const ChatInterface = ({ communityId, communityName }: ChatInterfaceProps) => {
     {
       id: 4,
       message: "Thanks for the warm welcome!",
-      sender: "You",
+      sender: user?.name || "You",
       timestamp: "Just now",
       isCurrentUser: true,
     },
@@ -80,7 +82,7 @@ const ChatInterface = ({ communityId, communityName }: ChatInterfaceProps) => {
       const message: Message = {
         id: messages.length + 1,
         message: newMessage,
-        sender: "You",
+        sender: user?.name || "You",
         timestamp: "Just now",
         isCurrentUser: true,
       };
@@ -134,8 +136,12 @@ const ChatInterface = ({ communityId, communityName }: ChatInterfaceProps) => {
       return "You can create a post by navigating to the Posts tab and using the text field at the top of the feed.";
     } else if (userMessage.toLowerCase().includes("payment") || userMessage.toLowerCase().includes("vip")) {
       return "For information about VIP plans and payment options, please check the Membership tab in your profile settings.";
+    } else if (userMessage.toLowerCase().includes("search")) {
+      return "You can search for communities or posts using the search bar at the top of the page. Try typing keywords related to your interests.";
+    } else if (userMessage.toLowerCase().includes("security") || userMessage.toLowerCase().includes("privacy")) {
+      return "We take your security seriously. Your data is encrypted and we never share your personal information with third parties. You can manage privacy settings in your profile.";
     } else {
-      return "I'm here to help with any questions about using ComuChat. Feel free to ask about specific features!";
+      return "I'm here to help with any questions about using ComuChat. Feel free to ask about specific features like joining communities, creating posts, safety features, or VIP membership!";
     }
   };
   

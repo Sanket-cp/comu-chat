@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Smile, Video, Robot, HelpCircle } from "lucide-react";
+import { Send, Smile, Video, Bot, HelpCircle } from "lucide-react";
 import ChatMessage from "./ChatMessage";
 import { useToast } from "@/hooks/use-toast";
 
@@ -150,7 +150,7 @@ const ChatInterface = ({ communityId, communityName }: ChatInterfaceProps) => {
             onClick={askAIAssistant}
             className="flex items-center"
           >
-            <Robot className="h-4 w-4 mr-1" />
+            <Bot className="h-4 w-4 mr-1" />
             <span className="hidden sm:inline">AI Assistant</span>
           </Button>
           <Button

@@ -5,7 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const LoginPage = () => {
   const [loginEmail, setLoginEmail] = useState("");
@@ -14,22 +16,72 @@ const LoginPage = () => {
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState("");
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!loginEmail || !loginPassword) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     console.log("Login attempt with:", { loginEmail, loginPassword });
     // Here you would normally authenticate with a backend service
+    toast({
+      title: "Login successful",
+      description: "Welcome back to ComuChat!",
+    });
+    navigate("/");
   };
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!registerName || !registerEmail || !registerPassword || !registerConfirmPassword) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (registerPassword !== registerConfirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!acceptTerms) {
+      toast({
+        title: "Error",
+        description: "You must accept the terms and conditions",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     console.log("Register attempt with:", { 
       registerName, 
       registerEmail, 
       registerPassword,
       registerConfirmPassword 
     });
+    
     // Here you would normally register with a backend service
+    toast({
+      title: "Registration successful",
+      description: "Your account has been created! Welcome to ComuChat.",
+    });
+    navigate("/");
   };
 
   return (
@@ -45,7 +97,7 @@ const LoginPage = () => {
             </svg>
           </div>
           <span className="text-xl font-bold tracking-tight">
-            CommunitySpark
+            ComuChat
           </span>
         </Link>
         <h1 className="text-2xl font-bold">Welcome Back!</h1>
@@ -170,6 +222,20 @@ const LoginPage = () => {
                     onChange={(e) => setRegisterConfirmPassword(e.target.value)}
                     required
                   />
+                </div>
+                
+                <div className="flex items-center space-x-2 mt-4">
+                  <Checkbox 
+                    id="terms" 
+                    checked={acceptTerms}
+                    onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
+                  />
+                  <label
+                    htmlFor="terms"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    I agree to the Terms of Service and Privacy Policy
+                  </label>
                 </div>
               </CardContent>
               

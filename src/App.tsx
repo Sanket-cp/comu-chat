@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import CommunityPage from "./pages/CommunityPage";
 import DiscoverPage from "./pages/DiscoverPage";
 import LoginPage from "./pages/LoginPage";
+import MembershipPage from "./pages/MembershipPage"; 
 import MainLayout from "./layouts/MainLayout";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/community/:id" element={<CommunityPage />} />
             <Route path="/discover" element={<DiscoverPage />} />
+            <Route path="/membership" element={<MembershipPage />} />
           </Route>
           <Route path="/login" element={<LoginPage />} />
           <Route path="*" element={<NotFound />} />

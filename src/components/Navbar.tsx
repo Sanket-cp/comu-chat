@@ -1,5 +1,5 @@
 
-import { Bell, Home, Menu, Search, Users } from "lucide-react";
+import { Bell, Home, Menu, Search, Users, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -30,6 +30,7 @@ import { useToast } from "@/hooks/use-toast";
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -48,6 +49,18 @@ const Navbar = () => {
     toast({
       title: "Searching for communities",
       description: `Showing results for "${term}"`,
+    });
+  };
+
+  const handleLogin = () => {
+    navigate("/login");
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out",
     });
   };
 
@@ -136,6 +149,15 @@ const Navbar = () => {
             </DialogContent>
           </Dialog>
           
+          <Link to="/membership">
+            <Button variant="ghost" size="icon" className="relative">
+              <Crown className="h-5 w-5 text-yellow-500" />
+              <span className="absolute -top-1 -right-1 bg-community-purple text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                +
+              </span>
+            </Button>
+          </Link>
+          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -149,35 +171,48 @@ const Navbar = () => {
             </DropdownMenuContent>
           </DropdownMenu>
           
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="rounded-full" size="icon">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="" />
-                  <AvatarFallback className="bg-community-purple text-white text-sm">
-                    GU
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem className="cursor-pointer">
-                <Link to="/profile" className="flex items-center w-full">
-                  Profile
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
-                <Link to="/settings" className="flex items-center w-full">
-                  Settings
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
-                <Link to="/login" className="flex items-center w-full">
-                  Login
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {isLoggedIn ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="rounded-full" size="icon">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src="" />
+                    <AvatarFallback className="bg-community-purple text-white text-sm">
+                      GU
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem className="cursor-pointer">
+                  <Link to="/profile" className="flex items-center w-full">
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">
+                  <Link to="/settings" className="flex items-center w-full">
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">
+                  <Link to="/membership" className="flex items-center w-full">
+                    Membership
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button 
+              variant="default" 
+              className="bg-community-purple hover:bg-community-darkPurple"
+              onClick={handleLogin}
+            >
+              Login
+            </Button>
+          )}
         </div>
       </div>
     </nav>

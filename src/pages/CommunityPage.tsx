@@ -1,5 +1,6 @@
 
 import { useParams } from "react-router-dom";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -8,12 +9,16 @@ import {
   Settings, 
   Share2, 
   Users,
-  FileText
+  FileText,
+  Video
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import ChatInterface from "@/components/ChatInterface";
 import { Separator } from "@/components/ui/separator";
 import PostFeed from "@/components/PostFeed";
+import ShareDialog from "@/components/ShareDialog";
+import { useToast } from "@/hooks/use-toast";
+import CommunitySettings from "@/components/CommunitySettings";
 
 // Demo community data
 const communities = [
@@ -107,11 +112,24 @@ const samplePosts = [
 
 const CommunityPage = () => {
   const { id } = useParams<{ id: string }>();
+  const { toast } = useToast();
   const communityId = parseInt(id || "1");
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [isMember, setIsMember] = useState(false);
   
   // Find the community by ID
   const community = communities.find(c => c.id === communityId) || communities[0];
   
+  const handleJoinCommunity = () => {
+    setIsMember(!isMember);
+    toast({
+      title: isMember ? "Left community" : "Joined community!",
+      description: isMember ? 
+        `You have left the ${community.name} community` : 
+        `Welcome to the ${community.name} community!`,
+    });
+  };
+
   return (
     <div className="container max-w-7xl py-6">
       <div className="grid grid-cols-1 gap-6">
@@ -130,10 +148,17 @@ const CommunityPage = () => {
             </div>
             
             <div className="flex items-center gap-2">
-              <Button className="bg-community-purple hover:bg-community-darkPurple">
-                Join Community
+              <Button 
+                className={isMember ? "bg-red-500 hover:bg-red-600" : "bg-community-purple hover:bg-community-darkPurple"}
+                onClick={handleJoinCommunity}
+              >
+                {isMember ? "Leave Community" : "Join Community"}
               </Button>
-              <Button variant="outline" size="icon">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => setIsShareDialogOpen(true)}
+              >
                 <Share2 className="h-4 w-4" />
               </Button>
             </div>
@@ -150,6 +175,10 @@ const CommunityPage = () => {
             <TabsTrigger value="chat" className="flex items-center">
               <MessageSquare className="h-4 w-4 mr-2" />
               Chat
+            </TabsTrigger>
+            <TabsTrigger value="video" className="flex items-center">
+              <Video className="h-4 w-4 mr-2" />
+              Video Call
             </TabsTrigger>
             <TabsTrigger value="about" className="flex items-center">
               <Info className="h-4 w-4 mr-2" />
@@ -174,6 +203,19 @@ const CommunityPage = () => {
               communityId={community.id} 
               communityName={community.name}
             />
+          </TabsContent>
+          
+          <TabsContent value="video" className="border rounded-lg p-6">
+            <div className="flex flex-col items-center justify-center py-12">
+              <Video className="h-16 w-16 text-community-purple mb-4" />
+              <h2 className="text-2xl font-bold mb-2">Start a Video Call</h2>
+              <p className="text-center text-gray-600 mb-6 max-w-md">
+                Connect face-to-face with other community members through video calls.
+              </p>
+              <Button className="bg-community-purple hover:bg-community-darkPurple">
+                Start Group Call
+              </Button>
+            </div>
           </TabsContent>
           
           <TabsContent value="about">
@@ -240,13 +282,17 @@ const CommunityPage = () => {
           </TabsContent>
           
           <TabsContent value="settings">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border">
-              <h2 className="text-xl font-semibold mb-6">Community Settings</h2>
-              <p className="text-gray-500">Settings management will be implemented in future updates.</p>
-            </div>
+            <CommunitySettings community={community} />
           </TabsContent>
         </Tabs>
       </div>
+      
+      <ShareDialog 
+        isOpen={isShareDialogOpen}
+        onClose={() => setIsShareDialogOpen(false)}
+        communityName={community.name}
+        communityId={community.id}
+      />
     </div>
   );
 };

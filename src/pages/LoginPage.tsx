@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAuth } from "@/contexts/AuthContext";
 
 const LoginPage = () => {
   const [loginEmail, setLoginEmail] = useState("");
@@ -19,8 +19,9 @@ const LoginPage = () => {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login, register } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginEmail || !loginPassword) {
       toast({
@@ -32,15 +33,24 @@ const LoginPage = () => {
     }
     
     console.log("Login attempt with:", { loginEmail, loginPassword });
-    // Here you would normally authenticate with a backend service
-    toast({
-      title: "Login successful",
-      description: "Welcome back to ComuChat!",
-    });
-    navigate("/");
+    
+    const success = await login(loginEmail, loginPassword);
+    if (success) {
+      toast({
+        title: "Login successful",
+        description: "Welcome back to ComuChat!",
+      });
+      navigate("/");
+    } else {
+      toast({
+        title: "Login failed",
+        description: "Invalid email or password",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!registerName || !registerEmail || !registerPassword || !registerConfirmPassword) {
       toast({
@@ -76,12 +86,20 @@ const LoginPage = () => {
       registerConfirmPassword 
     });
     
-    // Here you would normally register with a backend service
-    toast({
-      title: "Registration successful",
-      description: "Your account has been created! Welcome to ComuChat.",
-    });
-    navigate("/");
+    const success = await register(registerName, registerEmail, registerPassword);
+    if (success) {
+      toast({
+        title: "Registration successful",
+        description: "Your account has been created! Welcome to ComuChat.",
+      });
+      navigate("/");
+    } else {
+      toast({
+        title: "Registration failed",
+        description: "Failed to create account",
+        variant: "destructive"
+      });
+    }
   };
 
   return (

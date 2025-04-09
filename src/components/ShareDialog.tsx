@@ -11,12 +11,16 @@ interface ShareDialogProps {
   onClose: () => void;
   communityName: string;
   communityId: number;
+  isPost?: boolean;
 }
 
-const ShareDialog = ({ isOpen, onClose, communityName, communityId }: ShareDialogProps) => {
+const ShareDialog = ({ isOpen, onClose, communityName, communityId, isPost = false }: ShareDialogProps) => {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
-  const shareUrl = `${window.location.origin}/community/${communityId}`;
+  
+  const shareUrl = isPost 
+    ? `${window.location.origin}/post/${communityId}` 
+    : `${window.location.origin}/community/${communityId}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(shareUrl);
@@ -30,7 +34,9 @@ const ShareDialog = ({ isOpen, onClose, communityName, communityId }: ShareDialo
 
   const shareToSocial = (platform: string) => {
     let url = "";
-    const text = `Check out the ${communityName} community on ComuChat!`;
+    const text = isPost 
+      ? `Check out this post by ${communityName.replace('Post by ', '')} on ComuChat!`
+      : `Check out the ${communityName} community on ComuChat!`;
     
     switch (platform) {
       case "twitter":
@@ -46,7 +52,7 @@ const ShareDialog = ({ isOpen, onClose, communityName, communityId }: ShareDialo
     if (url) window.open(url, "_blank");
     toast({
       title: `Shared to ${platform}!`,
-      description: `Opening ${platform} to share this community`,
+      description: `Opening ${platform} to share this ${isPost ? 'post' : 'community'}`,
     });
   };
 
@@ -54,7 +60,7 @@ const ShareDialog = ({ isOpen, onClose, communityName, communityId }: ShareDialo
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Share Community</DialogTitle>
+          <DialogTitle>{isPost ? 'Share Post' : 'Share Community'}</DialogTitle>
         </DialogHeader>
         <div className="flex items-center space-x-2">
           <Input

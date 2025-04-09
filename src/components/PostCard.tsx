@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import ShareDialog from "@/components/ShareDialog";
 
 interface Comment {
   id: number;
@@ -53,6 +54,7 @@ const PostCard = ({
   const [comments, setComments] = useState<Comment[]>([]);
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
 
   const handleLike = () => {
     if (!isAuthenticated) {
@@ -104,6 +106,18 @@ const PostCard = ({
         description: "Your comment has been posted successfully",
       });
     }
+  };
+
+  const handleShare = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to share posts",
+        variant: "destructive"
+      });
+      return;
+    }
+    setIsShareDialogOpen(true);
   };
 
   // Format content with line breaks
@@ -168,8 +182,14 @@ const PostCard = ({
           <span>{comments.length + commentCount}</span>
         </Button>
         
-        <Button variant="ghost" size="sm" className="flex items-center gap-1">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="flex items-center gap-1"
+          onClick={handleShare}
+        >
           <Share2 className="h-4 w-4" />
+          <span>Share</span>
         </Button>
       </CardFooter>
       
@@ -232,6 +252,14 @@ const PostCard = ({
           </div>
         </div>
       )}
+
+      <ShareDialog 
+        isOpen={isShareDialogOpen}
+        onClose={() => setIsShareDialogOpen(false)}
+        communityName={`Post by ${author.name}`}
+        communityId={id}
+        isPost={true}
+      />
     </Card>
   );
 };

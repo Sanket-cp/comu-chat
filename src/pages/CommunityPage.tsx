@@ -1,6 +1,5 @@
-
 import { useParams } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -19,6 +18,9 @@ import PostFeed from "@/components/PostFeed";
 import ShareDialog from "@/components/ShareDialog";
 import { useToast } from "@/hooks/use-toast";
 import CommunitySettings from "@/components/CommunitySettings";
+import { useAuth } from "@/contexts/AuthContext";
+import { Link } from "react-router-dom";
+import VideoCallComponent from "@/components/VideoCallComponent";
 
 // Demo community data
 const communities = [
@@ -116,12 +118,58 @@ const CommunityPage = () => {
   const communityId = parseInt(id || "1");
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isMember, setIsMember] = useState(false);
+  const { isAuthenticated, user } = useAuth();
   
   // Find the community by ID
   const community = communities.find(c => c.id === communityId) || communities[0];
   
+  // Check for pre-existing membership
+  useEffect(() => {
+    // In a real app, this would call an API to check membership status
+    const checkMembership = () => {
+      if (isAuthenticated && user) {
+        // This is a mock check - in a real app, you'd fetch from API
+        const memberships = JSON.parse(localStorage.getItem('memberships') || '{}');
+        const userMemberships = memberships[user.id] || [];
+        setIsMember(userMemberships.includes(communityId));
+      }
+    };
+    
+    checkMembership();
+  }, [communityId, isAuthenticated, user]);
+  
   const handleJoinCommunity = () => {
-    setIsMember(!isMember);
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to join communities",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Toggle membership state
+    const newMemberState = !isMember;
+    setIsMember(newMemberState);
+    
+    // Update local storage to persist membership info
+    if (user) {
+      const memberships = JSON.parse(localStorage.getItem('memberships') || '{}');
+      if (!memberships[user.id]) memberships[user.id] = [];
+      
+      if (newMemberState) {
+        // Add this community to user's memberships if not already there
+        if (!memberships[user.id].includes(communityId)) {
+          memberships[user.id].push(communityId);
+        }
+      } else {
+        // Remove this community from user's memberships
+        memberships[user.id] = memberships[user.id].filter((id: number) => id !== communityId);
+      }
+      
+      localStorage.setItem('memberships', JSON.stringify(memberships));
+    }
+    
     toast({
       title: isMember ? "Left community" : "Joined community!",
       description: isMember ? 
@@ -148,12 +196,18 @@ const CommunityPage = () => {
             </div>
             
             <div className="flex items-center gap-2">
-              <Button 
-                className={isMember ? "bg-red-500 hover:bg-red-600" : "bg-community-purple hover:bg-community-darkPurple"}
-                onClick={handleJoinCommunity}
-              >
-                {isMember ? "Leave Community" : "Join Community"}
-              </Button>
+              {isAuthenticated ? (
+                <Button 
+                  className={isMember ? "bg-red-500 hover:bg-red-600" : "bg-community-purple hover:bg-community-darkPurple"}
+                  onClick={handleJoinCommunity}
+                >
+                  {isMember ? "Leave Community" : "Join Community"}
+                </Button>
+              ) : (
+                <Button className="bg-community-purple hover:bg-community-darkPurple" asChild>
+                  <Link to="/login">Login to Join</Link>
+                </Button>
+              )}
               <Button 
                 variant="outline" 
                 size="icon" 
@@ -206,16 +260,10 @@ const CommunityPage = () => {
           </TabsContent>
           
           <TabsContent value="video" className="border rounded-lg p-6">
-            <div className="flex flex-col items-center justify-center py-12">
-              <Video className="h-16 w-16 text-community-purple mb-4" />
-              <h2 className="text-2xl font-bold mb-2">Start a Video Call</h2>
-              <p className="text-center text-gray-600 mb-6 max-w-md">
-                Connect face-to-face with other community members through video calls.
-              </p>
-              <Button className="bg-community-purple hover:bg-community-darkPurple">
-                Start Group Call
-              </Button>
-            </div>
+            <VideoCallComponent 
+              communityId={community.id}
+              communityName={community.name}
+            />
           </TabsContent>
           
           <TabsContent value="about">

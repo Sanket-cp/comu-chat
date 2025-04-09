@@ -68,6 +68,8 @@ export default {
 					darkPurple: '#7E69AB',
 					lightBlue: '#D3E4FD',
 					softGray: '#F1F0FB',
+					lightPurple: '#E5DEFF',
+					pastelPink: '#FFDEE2',
 				}
 			},
 			borderRadius: {
@@ -95,13 +97,42 @@ export default {
 				'pulse-subtle': {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.8' },
+				},
+				'fade-in': {
+					'0%': { opacity: '0', transform: 'translateY(10px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' },
+				},
+				'slide-in': {
+					'0%': { opacity: '0', transform: 'translateX(-20px)' },
+					'100%': { opacity: '1', transform: 'translateX(0)' },
+				},
+				'scale-in': {
+					'0%': { opacity: '0', transform: 'scale(0.95)' },
+					'100%': { opacity: '1', transform: 'scale(1)' },
+				},
+				'glow': {
+					'0%, 100%': { boxShadow: '0 0 5px rgba(155, 135, 245, 0.3)' },
+					'50%': { boxShadow: '0 0 20px rgba(155, 135, 245, 0.6)' },
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite',
-			}
+				'fade-in': 'fade-in 0.4s ease-out',
+				'slide-in': 'slide-in 0.4s ease-out',
+				'scale-in': 'scale-in 0.3s ease-out',
+				'glow': 'glow 2s ease-in-out infinite',
+			},
+			boxShadow: {
+				'soft': '0 2px 10px rgba(0, 0, 0, 0.05)',
+				'medium': '0 4px 20px rgba(0, 0, 0, 0.1)',
+				'glow': '0 0 15px rgba(155, 135, 245, 0.5)',
+			},
+			backgroundImage: {
+				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+				'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

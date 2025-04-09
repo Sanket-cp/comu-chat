@@ -13,11 +13,11 @@ const MainLayout = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex w-full bg-gradient-to-br from-white to-community-softGray dark:from-gray-900 dark:to-gray-950">
         <CommunitySidebar />
         <div className="flex-1">
           <Navbar />
-          <main className="min-h-[calc(100vh-4rem)]">
+          <main className="min-h-[calc(100vh-4rem)] animate-fade-in">
             <Outlet />
           </main>
           <SafetyButton />

@@ -212,3 +212,68 @@
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* Modern UI Styles */
+.gradient-border {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: var(--radius);
+  padding: 2px;
+  background: linear-gradient(45deg, #9b87f5, #7E69AB, #9b87f5);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  background-size: 300% 300%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Modern buttons */
+.btn-modern {
+  @apply relative overflow-hidden rounded-md transition-all duration-300 shadow-md;
+}
+
+.btn-modern::before {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-r from-community-purple to-community-darkPurple opacity-0 transition-opacity duration-300;
+}
+
+.btn-modern:hover::before {
+  @apply opacity-10;
+}
+
+/* AI chat interface */
+.ai-chat-container {
+  @apply border rounded-xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-md;
+}
+
+.ai-chat-header {
+  @apply flex items-center justify-between p-3 border-b bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20;
+}
+
+.ai-message {
+  @apply p-3 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 shadow-sm;
+}
+
+.user-message {
+  @apply p-3 rounded-xl bg-gradient-to-r from-community-purple/10 to-community-darkPurple/10 dark:from-community-purple/20 dark:to-community-darkPurple/20 shadow-sm;
+}

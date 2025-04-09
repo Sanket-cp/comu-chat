@@ -22,9 +22,10 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 // Demo communities for initial display
-const communities = [
+const initialCommunities = [
   { id: 1, name: "Music Lovers", icon: "🎵" },
   { id: 2, name: "Foodies United", icon: "🍔" },
   { id: 3, name: "Tech Talk", icon: "💻" },
@@ -36,17 +37,39 @@ const communities = [
 ];
 
 const CommunitySidebar = () => {
+  const [communities, setCommunities] = useState(initialCommunities);
   const [communityName, setCommunityName] = useState("");
   const [communityDescription, setCommunityDescription] = useState("");
   const [communityIcon, setCommunityIcon] = useState("🌟");
   const [open, setOpen] = useState(false);
+  const { toast } = useToast();
 
   const handleCreateCommunity = () => {
-    // This would normally save to a database
-    console.log("Creating community:", {
-      name: communityName,
-      description: communityDescription,
-      icon: communityIcon
+    // Validate inputs
+    if (!communityName.trim()) {
+      toast({
+        title: "Name required",
+        description: "Please provide a name for your community",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Create new community
+    const newCommunity = {
+      id: Date.now(), // Generate unique ID
+      name: communityName.trim(),
+      icon: communityIcon || "🌟",
+      description: communityDescription
+    };
+    
+    // Add to communities list
+    setCommunities([...communities, newCommunity]);
+    
+    // Show success toast
+    toast({
+      title: "Community created",
+      description: `${newCommunity.name} has been created successfully!`,
     });
     
     // Close the dialog

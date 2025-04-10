@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const CreateCommunityPage = () => {
   const [communityName, setCommunityName] = useState("");
@@ -14,6 +15,25 @@ const CreateCommunityPage = () => {
   const [communityIcon, setCommunityIcon] = useState("🌟");
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  // Check if user is authenticated when component mounts
+  useEffect(() => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in or register to create a community",
+        variant: "destructive"
+      });
+      // Redirect to login page with a return URL
+      navigate("/login?returnTo=/create-community");
+    }
+  }, [isAuthenticated, navigate, toast]);
+
+  // If not authenticated, show nothing while redirecting
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const handleCreateCommunity = () => {
     // Validate inputs
@@ -39,6 +59,12 @@ const CreateCommunityPage = () => {
       title: "Community created",
       description: `${newCommunity.name} has been created successfully!`,
     });
+    
+    // Save the community to localStorage
+    const storedCommunities = localStorage.getItem("communities") || "[]";
+    const communities = JSON.parse(storedCommunities);
+    communities.push(newCommunity);
+    localStorage.setItem("communities", JSON.stringify(communities));
     
     // Navigate to the new community page
     navigate(`/community/${newCommunity.id}`);

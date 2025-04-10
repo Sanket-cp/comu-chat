@@ -18,7 +18,8 @@ import { TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tooltip } from "@/components/ui/tooltip";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Demo communities for initial display
 const initialCommunities = [
@@ -36,6 +37,45 @@ const CommunitySidebar = () => {
   const [communities, setCommunities] = useState(initialCommunities);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  
+  // Load communities from localStorage on component mount
+  useEffect(() => {
+    const storedCommunities = localStorage.getItem("communities");
+    if (storedCommunities) {
+      try {
+        // Merge stored communities with initial ones, avoiding duplicates by ID
+        const parsedCommunities = JSON.parse(storedCommunities);
+        const allCommunities = [...initialCommunities];
+        
+        parsedCommunities.forEach(newCommunity => {
+          if (!allCommunities.some(c => c.id === newCommunity.id)) {
+            allCommunities.push(newCommunity);
+          }
+        });
+        
+        setCommunities(allCommunities);
+      } catch (error) {
+        console.error("Failed to parse communities from localStorage", error);
+      }
+    } else {
+      // If no communities in localStorage, initialize with the default ones
+      localStorage.setItem("communities", JSON.stringify(initialCommunities));
+    }
+  }, []);
+  
+  const handleCreateCommunity = () => {
+    if (isAuthenticated) {
+      navigate("/create-community");
+    } else {
+      toast({
+        title: "Authentication required",
+        description: "Please log in or register to create a community",
+        variant: "destructive"
+      });
+      navigate("/login?returnTo=/create-community");
+    }
+  };
 
   return (
     <Sidebar>
@@ -74,11 +114,14 @@ const CommunitySidebar = () => {
           <SidebarGroupLabel>
             <div className="flex justify-between items-center w-full pr-2">
               <span>My Communities</span>
-              <Link to="/create-community">
-                <Button variant="ghost" size="icon" className="h-5 w-5">
-                  <PlusCircle className="h-5 w-5" />
-                </Button>
-              </Link>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-5 w-5"
+                onClick={handleCreateCommunity}
+              >
+                <PlusCircle className="h-5 w-5" />
+              </Button>
             </div>
           </SidebarGroupLabel>
           <SidebarGroupContent>

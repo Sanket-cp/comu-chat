@@ -1,11 +1,11 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,10 +29,21 @@ const LoginPage = () => {
     confirmPassword: "", 
     terms: "" 
   });
+  const [returnTo, setReturnTo] = useState("/");
   
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { login, register } = useAuth();
+
+  // Extract returnTo from URL query parameters
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const returnPath = queryParams.get("returnTo");
+    if (returnPath) {
+      setReturnTo(returnPath);
+    }
+  }, [location.search]);
 
   const validateEmail = (email: string) => {
     return String(email)
@@ -71,7 +82,7 @@ const LoginPage = () => {
         title: "Login successful",
         description: "Welcome back to ComuChat!",
       });
-      navigate("/");
+      navigate(returnTo);
     } else {
       toast({
         title: "Login failed",
@@ -145,7 +156,7 @@ const LoginPage = () => {
         title: "Registration successful",
         description: "Your account has been created! Welcome to ComuChat.",
       });
-      navigate("/");
+      navigate(returnTo);
     } else {
       toast({
         title: "Registration failed",

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import CommunityPage from "./pages/CommunityPage";
+import CreateCommunityPage from "./pages/CreateCommunityPage";
 import DiscoverPage from "./pages/DiscoverPage";
 import LoginPage from "./pages/LoginPage";
 import MembershipPage from "./pages/MembershipPage"; 
@@ -29,6 +30,7 @@ const App = () => {
               <Route element={<MainLayout />}>
                 <Route path="/" element={<Index />} />
                 <Route path="/community/:id" element={<CommunityPage />} />
+                <Route path="/create-community" element={<CreateCommunityPage />} />
                 <Route path="/discover" element={<DiscoverPage />} />
                 <Route path="/membership" element={<MembershipPage />} />
                 <Route path="/profile" element={<ProfilePage />} />

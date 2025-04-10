@@ -16,13 +16,9 @@ import {
 } from "@/components/ui/sidebar";
 import { TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tooltip } from "@/components/ui/tooltip";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 // Demo communities for initial display
 const initialCommunities = [
@@ -38,52 +34,8 @@ const initialCommunities = [
 
 const CommunitySidebar = () => {
   const [communities, setCommunities] = useState(initialCommunities);
-  const [communityName, setCommunityName] = useState("");
-  const [communityDescription, setCommunityDescription] = useState("");
-  const [communityIcon, setCommunityIcon] = useState("🌟");
-  const [open, setOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  const handleCreateCommunity = () => {
-    // Validate inputs
-    if (!communityName.trim()) {
-      toast({
-        title: "Name required",
-        description: "Please provide a name for your community",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Create new community
-    const newCommunity = {
-      id: Date.now(), // Generate unique ID
-      name: communityName.trim(),
-      icon: communityIcon || "🌟",
-      description: communityDescription
-    };
-    
-    // Add to communities list
-    setCommunities([...communities, newCommunity]);
-    
-    // Show success toast
-    toast({
-      title: "Community created",
-      description: `${newCommunity.name} has been created successfully!`,
-    });
-    
-    // Close the dialog
-    setOpen(false);
-    
-    // Reset form
-    setCommunityName("");
-    setCommunityDescription("");
-    setCommunityIcon("🌟");
-    
-    // Navigate to the new community page
-    navigate(`/community/${newCommunity.id}`);
-  };
 
   return (
     <Sidebar>
@@ -122,55 +74,11 @@ const CommunitySidebar = () => {
           <SidebarGroupLabel>
             <div className="flex justify-between items-center w-full pr-2">
               <span>My Communities</span>
-              <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-5 w-5">
-                    <PlusCircle className="h-5 w-5" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create a new community</DialogTitle>
-                    <DialogDescription>
-                      Create a community to connect with people who share your interests.
-                    </DialogDescription>
-                  </DialogHeader>
-                  
-                  <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="community-icon">Community Icon</Label>
-                      <Input 
-                        id="community-icon" 
-                        value={communityIcon}
-                        onChange={(e) => setCommunityIcon(e.target.value)}
-                        placeholder="Choose an emoji as icon"
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="community-name">Name</Label>
-                      <Input 
-                        id="community-name" 
-                        value={communityName}
-                        onChange={(e) => setCommunityName(e.target.value)}
-                        placeholder="e.g. Music Lovers"
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="community-description">Description</Label>
-                      <Textarea
-                        id="community-description"
-                        value={communityDescription}
-                        onChange={(e) => setCommunityDescription(e.target.value)}
-                        placeholder="What's this community about?"
-                      />
-                    </div>
-                  </div>
-                  
-                  <DialogFooter>
-                    <Button onClick={handleCreateCommunity}>Create Community</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              <Link to="/create-community">
+                <Button variant="ghost" size="icon" className="h-5 w-5">
+                  <PlusCircle className="h-5 w-5" />
+                </Button>
+              </Link>
             </div>
           </SidebarGroupLabel>
           <SidebarGroupContent>

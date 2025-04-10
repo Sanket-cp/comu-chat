@@ -29,10 +29,10 @@ const MainLayout = () => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-white to-community-softGray dark:from-gray-900 dark:to-gray-950">
         <CommunitySidebar />
-        <div className="flex-1">
+        <div className="flex-1 w-full">
           <Navbar />
           {!isHomePage && (
-            <div className="flex items-center gap-2 p-2 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
+            <div className="flex items-center gap-2 p-3 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-b">
               <Button
                 variant="ghost"
                 size="sm"
@@ -54,7 +54,7 @@ const MainLayout = () => {
               </Button>
             </div>
           )}
-          <main className="min-h-[calc(100vh-4rem)] animate-fade-in">
+          <main className="min-h-[calc(100vh-4rem)] animate-fade-in max-w-full">
             <Outlet />
           </main>
           <SafetyButton />

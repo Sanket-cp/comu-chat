@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { Card, CardContent } from "@/components/ui/card";
 
 const CreateCommunityPage = () => {
   const [communityName, setCommunityName] = useState("");
@@ -51,7 +52,10 @@ const CreateCommunityPage = () => {
       id: Date.now(), // Generate unique ID
       name: communityName.trim(),
       icon: communityIcon || "🌟",
-      description: communityDescription
+      description: communityDescription,
+      memberCount: 1, // Starting with the creator as member
+      createdAt: new Date().toISOString(),
+      tags: [] // Empty tags array for future enhancement
     };
     
     // Show success toast
@@ -71,71 +75,76 @@ const CreateCommunityPage = () => {
   };
 
   return (
-    <div className="container py-8 max-w-2xl mx-auto animate-fade-in">
-      <div className="mb-6 flex items-center">
+    <div className="container py-10 max-w-4xl mx-auto animate-fade-in">
+      <div className="mb-8 flex items-center">
         <Button 
           variant="ghost" 
           size="sm" 
           onClick={() => navigate(-1)}
-          className="mr-2"
+          className="mr-3"
         >
-          <ArrowLeft className="h-4 w-4 mr-1" />
+          <ArrowLeft className="h-5 w-5 mr-2" />
           Back
         </Button>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-community-indigo via-community-brightPurple to-community-neonPink text-transparent bg-clip-text">Create Community</h1>
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-community-indigo via-community-brightPurple to-community-neonPink text-transparent bg-clip-text">Create Your Community</h1>
       </div>
 
-      <div className="bg-card border rounded-lg shadow-sm p-6">
-        <div className="grid gap-6">
-          <div className="grid gap-2">
-            <Label htmlFor="community-icon">Community Icon</Label>
-            <Input 
-              id="community-icon" 
-              value={communityIcon}
-              onChange={(e) => setCommunityIcon(e.target.value)}
-              placeholder="Choose an emoji as icon"
-              className="text-lg"
-            />
-            <p className="text-sm text-muted-foreground">
-              Choose an emoji that represents your community
-            </p>
+      <Card className="shadow-lg border-2 border-gray-100 dark:border-gray-800">
+        <CardContent className="p-8">
+          <div className="grid gap-8">
+            <div className="grid gap-3">
+              <Label htmlFor="community-icon" className="text-lg font-medium">Community Icon</Label>
+              <Input 
+                id="community-icon" 
+                value={communityIcon}
+                onChange={(e) => setCommunityIcon(e.target.value)}
+                placeholder="Choose an emoji as icon"
+                className="text-2xl p-6 h-auto"
+              />
+              <p className="text-sm text-muted-foreground">
+                Choose an emoji that represents your community
+              </p>
+            </div>
+            
+            <div className="grid gap-3">
+              <Label htmlFor="community-name" className="text-lg font-medium">Community Name</Label>
+              <Input 
+                id="community-name" 
+                value={communityName}
+                onChange={(e) => setCommunityName(e.target.value)}
+                placeholder="e.g. Music Lovers"
+                className="p-6 h-auto text-lg"
+              />
+              <p className="text-sm text-muted-foreground">
+                Choose a unique, descriptive name that will attract members
+              </p>
+            </div>
+            
+            <div className="grid gap-3">
+              <Label htmlFor="community-description" className="text-lg font-medium">Description</Label>
+              <Textarea
+                id="community-description"
+                value={communityDescription}
+                onChange={(e) => setCommunityDescription(e.target.value)}
+                placeholder="What's this community about? Who should join? What will members discuss?"
+                rows={6}
+                className="text-lg p-4 resize-y"
+              />
+              <p className="text-sm text-muted-foreground">
+                Describe your community to help others understand its purpose and values
+              </p>
+            </div>
+            
+            <Button 
+              onClick={handleCreateCommunity}
+              size="lg"
+              className="w-full mt-4 bg-gradient-to-r from-community-indigo to-community-brightPurple hover:from-community-indigo/90 hover:to-community-brightPurple/90 text-white text-lg p-6 h-auto"
+            >
+              Launch Community
+            </Button>
           </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="community-name">Community Name</Label>
-            <Input 
-              id="community-name" 
-              value={communityName}
-              onChange={(e) => setCommunityName(e.target.value)}
-              placeholder="e.g. Music Lovers"
-            />
-            <p className="text-sm text-muted-foreground">
-              Choose a unique, descriptive name
-            </p>
-          </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="community-description">Description</Label>
-            <Textarea
-              id="community-description"
-              value={communityDescription}
-              onChange={(e) => setCommunityDescription(e.target.value)}
-              placeholder="What's this community about?"
-              rows={4}
-            />
-            <p className="text-sm text-muted-foreground">
-              Describe your community to help others understand its purpose
-            </p>
-          </div>
-          
-          <Button 
-            onClick={handleCreateCommunity}
-            className="w-full bg-gradient-to-r from-community-indigo to-community-brightPurple hover:from-community-indigo/90 hover:to-community-brightPurple/90 text-white"
-          >
-            Create Community
-          </Button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

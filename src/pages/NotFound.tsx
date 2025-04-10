@@ -16,27 +16,27 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
-      <div className="text-center">
-        <h1 className="text-9xl font-bold text-community-purple">404</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background to-muted px-4">
+      <div className="text-center animate-fade-in">
+        <h1 className="text-9xl font-bold bg-gradient-to-r from-community-indigo via-community-brightPurple to-community-neonPink text-transparent bg-clip-text animate-gradient-shift">404</h1>
         <div className="mt-4 mb-8">
-          <h2 className="text-3xl font-bold mb-2">Page Not Found</h2>
-          <p className="text-xl text-gray-600 mb-2">
+          <h2 className="text-3xl font-bold mb-2 text-foreground">Page Not Found</h2>
+          <p className="text-xl text-muted-foreground mb-2">
             The page you're looking for doesn't exist or has been moved.
           </p>
-          <p className="text-gray-500">
-            Path: <code className="bg-gray-100 px-2 py-1 rounded">{location.pathname}</code>
+          <p className="text-muted-foreground">
+            Path: <code className="bg-muted px-2 py-1 rounded">{location.pathname}</code>
           </p>
         </div>
         <div className="flex gap-4 justify-center">
           <Button 
-            className="bg-community-purple hover:bg-community-darkPurple"
             onClick={() => navigate(-1)}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 shadow-md hover:shadow-lg"
           >
             Go Back
           </Button>
           <Link to="/">
-            <Button variant="outline">
+            <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
               Return to Home
             </Button>
           </Link>

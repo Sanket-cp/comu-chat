@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 // Demo communities for initial display
@@ -43,6 +43,7 @@ const CommunitySidebar = () => {
   const [communityIcon, setCommunityIcon] = useState("🌟");
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleCreateCommunity = () => {
     // Validate inputs
@@ -79,6 +80,9 @@ const CommunitySidebar = () => {
     setCommunityName("");
     setCommunityDescription("");
     setCommunityIcon("🌟");
+    
+    // Navigate to the new community page
+    navigate(`/community/${newCommunity.id}`);
   };
 
   return (

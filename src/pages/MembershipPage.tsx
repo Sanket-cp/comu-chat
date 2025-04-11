@@ -3,27 +3,56 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Crown, Star } from "lucide-react";
+import { Check, Crown, ShieldCheck, Star, Trophy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { Progress } from "@/components/ui/progress";
 
 const MembershipPage = () => {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [currentPlanToUpgrade, setCurrentPlanToUpgrade] = useState('');
+  const [currentPriceToUpgrade, setCurrentPriceToUpgrade] = useState('');
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
+  
+  // Simulate usage percentage - in a real app this would come from your backend
+  const usagePercentage = parseInt(localStorage.getItem("usagePercentage") || "0");
 
   const handleSubscribe = (plan: string, price: string) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to subscribe to a plan",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setCurrentPlanToUpgrade(plan);
+    setCurrentPriceToUpgrade(price);
+    setShowConfirmDialog(true);
+  };
+  
+  const confirmSubscription = () => {
     // Here you would redirect to a payment processor like Stripe
     toast({
       title: "Processing payment",
-      description: `Redirecting to payment for ${plan} plan (${price})`,
+      description: `Redirecting to payment for ${currentPlanToUpgrade} plan (${currentPriceToUpgrade})`,
     });
     
     // Simulate successful payment after 2 seconds
     setTimeout(() => {
       toast({
         title: "Payment successful!",
-        description: `You are now subscribed to the ${plan} plan!`,
+        description: `You are now subscribed to the ${currentPlanToUpgrade} plan!`,
       });
-      setSelectedPlan(plan);
+      setSelectedPlan(currentPlanToUpgrade);
+      setShowConfirmDialog(false);
+      
+      // Reset usage counter after upgrading
+      localStorage.setItem("usagePercentage", "0");
     }, 2000);
   };
 
@@ -52,6 +81,30 @@ const MembershipPage = () => {
 
   return (
     <div className="container max-w-7xl py-12">
+      {isAuthenticated && selectedPlan !== 'Premium' && selectedPlan !== 'Ultimate' && (
+        <div className="mb-10 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-xl font-semibold flex items-center">
+              <ShieldCheck className="mr-2 h-5 w-5 text-community-purple" />
+              Your Current Usage
+            </h2>
+            <Badge variant="outline" className="px-3 py-1">Basic Plan</Badge>
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Free Plan Usage</span>
+              <span className="font-medium">{usagePercentage}%</span>
+            </div>
+            <Progress value={usagePercentage} className="h-2" />
+            <p className="text-sm text-muted-foreground">
+              {usagePercentage > 70 
+                ? "You're approaching your free plan limit. Upgrade now to avoid interruptions." 
+                : "Enjoy your free plan. Upgrade anytime to unlock more features."}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="text-center mb-12">
         <h1 className="text-3xl font-bold mb-2">Upgrade Your ComuChat Experience</h1>
         <p className="text-gray-600 max-w-2xl mx-auto">
@@ -61,7 +114,7 @@ const MembershipPage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Basic Plan */}
-        <Card className={`border ${selectedPlan === 'Basic' ? 'border-community-purple ring-2 ring-community-purple' : ''}`}>
+        <Card className={`border ${selectedPlan === 'Basic' ? 'border-community-purple ring-2 ring-community-purple' : 'hover:shadow-lg transition-shadow duration-300'}`}>
           <CardHeader>
             <CardTitle className="flex justify-between items-center">
               Basic
@@ -95,7 +148,7 @@ const MembershipPage = () => {
         </Card>
 
         {/* Premium Plan */}
-        <Card className={`border ${selectedPlan === 'Premium' ? 'border-community-purple ring-2 ring-community-purple' : ''}`}>
+        <Card className={`border ${selectedPlan === 'Premium' ? 'border-community-purple ring-2 ring-community-purple' : 'hover:shadow-lg transition-shadow duration-300'} ${usagePercentage > 70 ? 'shadow-xl scale-105 border-community-purple/50' : ''}`}>
           <CardHeader>
             <CardTitle className="flex justify-between items-center">
               Premium
@@ -129,7 +182,7 @@ const MembershipPage = () => {
         </Card>
 
         {/* Ultimate Plan */}
-        <Card className={`border ${selectedPlan === 'Ultimate' ? 'border-community-purple ring-2 ring-community-purple' : ''}`}>
+        <Card className={`border ${selectedPlan === 'Ultimate' ? 'border-community-purple ring-2 ring-community-purple' : 'hover:shadow-lg transition-shadow duration-300'}`}>
           <CardHeader className="relative">
             <div className="absolute -top-4 -right-4">
               <Badge className="bg-yellow-500 text-white px-3 py-1 flex items-center">
@@ -182,6 +235,47 @@ const MembershipPage = () => {
           </div>
         </div>
       </div>
+      
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Subscription</DialogTitle>
+            <DialogDescription>
+              You're about to subscribe to the {currentPlanToUpgrade} plan for {currentPriceToUpgrade} per month.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <h4 className="font-medium mb-2 flex items-center">
+              <Trophy className="h-4 w-4 text-community-purple mr-2" />
+              Benefits you'll receive:
+            </h4>
+            <ul className="space-y-1 text-sm">
+              {currentPlanToUpgrade === 'Premium' && features.premium.map((feature, i) => (
+                <li key={i} className="flex items-center">
+                  <Check className="h-4 w-4 text-green-500 mr-2" /> {feature}
+                </li>
+              ))}
+              {currentPlanToUpgrade === 'Ultimate' && features.ultimate.map((feature, i) => (
+                <li key={i} className="flex items-center">
+                  <Check className="h-4 w-4 text-green-500 mr-2" /> {feature}
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>Cancel</Button>
+            <Button 
+              onClick={confirmSubscription}
+              className="bg-community-purple hover:bg-community-darkPurple"
+            >
+              Confirm Payment
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

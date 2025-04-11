@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
@@ -18,6 +19,7 @@ const ForgotPasswordPage = () => {
   const [resetCodeError, setResetCodeError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [demoResetCode, setDemoResetCode] = useState("");
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -56,6 +58,7 @@ const ForgotPasswordPage = () => {
     
     // Generate a reset code (in a real app, this would be sent via email)
     const mockResetCode = "123456"; // In a real app, this would be a random string
+    setDemoResetCode(mockResetCode);
     
     // Store the reset code (in a real app, this would be stored securely in the backend)
     const passwordResets = JSON.parse(localStorage.getItem("passwordResets") || "{}");
@@ -66,8 +69,8 @@ const ForgotPasswordPage = () => {
     localStorage.setItem("passwordResets", JSON.stringify(passwordResets));
     
     toast({
-      title: "Reset code sent",
-      description: `A password reset code has been sent to ${email}. For this demo, the code is: ${mockResetCode}`,
+      title: "Demo Mode: Reset Code Generated",
+      description: "In a real app, the code would be sent to your email.",
     });
     
     setStep("reset");
@@ -166,6 +169,14 @@ const ForgotPasswordPage = () => {
         <p className="text-gray-500">We'll help you get back into your account</p>
       </div>
 
+      <Alert className="mb-6 bg-blue-50 border-blue-200">
+        <InfoIcon className="h-4 w-4" />
+        <AlertTitle>Demo Mode</AlertTitle>
+        <AlertDescription>
+          This is a demo application. No actual emails are sent. Reset codes will be displayed on this page.
+        </AlertDescription>
+      </Alert>
+
       <Card>
         {step === "email" && (
           <form onSubmit={handleRequestReset}>
@@ -216,11 +227,21 @@ const ForgotPasswordPage = () => {
             <CardHeader>
               <CardTitle>Reset Your Password</CardTitle>
               <CardDescription>
-                Enter the reset code we sent to your email and create a new password
+                Enter the reset code and create a new password
               </CardDescription>
             </CardHeader>
             
             <CardContent className="space-y-4">
+              {demoResetCode && (
+                <Alert className="bg-yellow-50 border-yellow-200 mb-4">
+                  <AlertTitle>Demo Reset Code:</AlertTitle>
+                  <AlertDescription className="font-mono text-lg font-bold">{demoResetCode}</AlertDescription>
+                  <AlertDescription className="text-sm mt-2">
+                    In a real application, this code would be sent to your email.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               <div className="space-y-2">
                 <Label htmlFor="reset-code">Reset Code</Label>
                 <Input 

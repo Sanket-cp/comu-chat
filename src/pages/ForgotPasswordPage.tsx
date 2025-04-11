@@ -8,6 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
@@ -20,6 +21,7 @@ const ForgotPasswordPage = () => {
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [demoResetCode, setDemoResetCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -30,7 +32,7 @@ const ForgotPasswordPage = () => {
       .match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
   };
 
-  const handleRequestReset = (e: React.FormEvent) => {
+  const handleRequestReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setEmailError("");
     
@@ -44,39 +46,42 @@ const ForgotPasswordPage = () => {
       return;
     }
     
-    // Get stored users
-    const storedUsers = localStorage.getItem("users") || "[]";
-    const users = JSON.parse(storedUsers);
+    setIsLoading(true);
     
-    // Check if user exists
-    const userExists = users.some((user: any) => user.email === email);
-    
-    if (!userExists) {
-      setEmailError("No account found with this email address");
-      return;
+    try {
+      // Call the Supabase edge function to handle password reset
+      const { data, error } = await supabase.functions.invoke("reset-password", {
+        body: { email }
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      // For demo purposes, display the token (in a real app, this would be sent via email)
+      if (data.debug && data.debug.token) {
+        setDemoResetCode(data.debug.token);
+      }
+      
+      toast({
+        title: "Reset Code Sent",
+        description: "If an account exists with this email, we've sent a reset code.",
+      });
+      
+      setStep("reset");
+    } catch (error) {
+      console.error("Password reset request failed:", error);
+      toast({
+        title: "Request Failed",
+        description: "Failed to request password reset. Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
     }
-    
-    // Generate a reset code (in a real app, this would be sent via email)
-    const mockResetCode = "123456"; // In a real app, this would be a random string
-    setDemoResetCode(mockResetCode);
-    
-    // Store the reset code (in a real app, this would be stored securely in the backend)
-    const passwordResets = JSON.parse(localStorage.getItem("passwordResets") || "{}");
-    passwordResets[email] = {
-      code: mockResetCode,
-      expiresAt: new Date(Date.now() + 30 * 60000).toISOString(), // 30 minutes from now
-    };
-    localStorage.setItem("passwordResets", JSON.stringify(passwordResets));
-    
-    toast({
-      title: "Demo Mode: Reset Code Generated",
-      description: "In a real app, the code would be sent to your email.",
-    });
-    
-    setStep("reset");
   };
 
-  const handleResetPassword = (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setResetCodeError("");
     setPasswordError("");
@@ -107,42 +112,39 @@ const ForgotPasswordPage = () => {
     
     if (hasErrors) return;
     
-    // Verify the reset code
-    const passwordResets = JSON.parse(localStorage.getItem("passwordResets") || "{}");
-    const resetInfo = passwordResets[email];
+    setIsLoading(true);
     
-    if (!resetInfo || resetInfo.code !== resetCode) {
-      setResetCodeError("Invalid reset code");
-      return;
-    }
-    
-    // Check if the reset code has expired
-    if (new Date(resetInfo.expiresAt) < new Date()) {
-      setResetCodeError("Reset code has expired. Please request a new one");
-      return;
-    }
-    
-    // Update the user's password
-    const storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
-    const updatedUsers = storedUsers.map((user: any) => {
-      if (user.email === email) {
-        return { ...user, password: newPassword };
+    try {
+      // Call the Supabase edge function to verify the reset token and update password
+      const { data, error } = await supabase.functions.invoke("verify-reset", {
+        body: { 
+          token: resetCode,
+          email,
+          newPassword
+        }
+      });
+      
+      if (error) {
+        throw error;
       }
-      return user;
-    });
-    
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-    
-    // Clean up the reset code
-    delete passwordResets[email];
-    localStorage.setItem("passwordResets", JSON.stringify(passwordResets));
-    
-    toast({
-      title: "Password reset successful",
-      description: "Your password has been updated. You can now log in with your new password.",
-    });
-    
-    setStep("success");
+      
+      toast({
+        title: "Password Reset Successful",
+        description: "Your password has been updated. You can now log in with your new password.",
+      });
+      
+      setStep("success");
+    } catch (error) {
+      console.error("Password reset failed:", error);
+      setResetCodeError("Invalid or expired reset code. Please try again.");
+      toast({
+        title: "Reset Failed",
+        description: "Failed to reset your password. Please check your code and try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBackToLogin = () => {
@@ -173,7 +175,7 @@ const ForgotPasswordPage = () => {
         <InfoIcon className="h-4 w-4" />
         <AlertTitle>Demo Mode</AlertTitle>
         <AlertDescription>
-          This is a demo application. No actual emails are sent. Reset codes will be displayed on this page.
+          This is a demo application. For testing purposes, reset codes will be displayed on this page. In a production app, they would be sent via email.
         </AlertDescription>
       </Alert>
 
@@ -197,6 +199,7 @@ const ForgotPasswordPage = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={emailError ? "border-red-500" : ""}
+                  disabled={isLoading}
                 />
                 {emailError && (
                   <p className="text-red-500 text-sm mt-1">{emailError}</p>
@@ -209,14 +212,16 @@ const ForgotPasswordPage = () => {
                 type="button" 
                 variant="outline"
                 onClick={handleBackToLogin}
+                disabled={isLoading}
               >
                 Back to Login
               </Button>
               <Button 
                 type="submit" 
                 className="bg-community-purple hover:bg-community-darkPurple"
+                disabled={isLoading}
               >
-                Send Reset Code
+                {isLoading ? "Sending..." : "Send Reset Code"}
               </Button>
             </CardFooter>
           </form>
@@ -250,6 +255,7 @@ const ForgotPasswordPage = () => {
                   value={resetCode}
                   onChange={(e) => setResetCode(e.target.value)}
                   className={resetCodeError ? "border-red-500" : ""}
+                  disabled={isLoading}
                 />
                 {resetCodeError && (
                   <p className="text-red-500 text-sm mt-1">{resetCodeError}</p>
@@ -265,6 +271,7 @@ const ForgotPasswordPage = () => {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   className={passwordError ? "border-red-500" : ""}
+                  disabled={isLoading}
                 />
                 {passwordError && (
                   <p className="text-red-500 text-sm mt-1">{passwordError}</p>
@@ -280,6 +287,7 @@ const ForgotPasswordPage = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className={confirmPasswordError ? "border-red-500" : ""}
+                  disabled={isLoading}
                 />
                 {confirmPasswordError && (
                   <p className="text-red-500 text-sm mt-1">{confirmPasswordError}</p>
@@ -292,14 +300,16 @@ const ForgotPasswordPage = () => {
                 type="button" 
                 variant="outline"
                 onClick={() => setStep("email")}
+                disabled={isLoading}
               >
                 Back
               </Button>
               <Button 
                 type="submit" 
                 className="bg-community-purple hover:bg-community-darkPurple"
+                disabled={isLoading}
               >
-                Reset Password
+                {isLoading ? "Resetting..." : "Reset Password"}
               </Button>
             </CardFooter>
           </form>

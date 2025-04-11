@@ -92,7 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const users = JSON.parse(storedUsers);
     
     // Check if email already exists
-    if (users.some((user: any) => user.email === email)) {
+    if (users.some((user: any) => user.email.toLowerCase() === email.toLowerCase())) {
       toast({
         title: "Registration failed",
         description: "Email already in use",

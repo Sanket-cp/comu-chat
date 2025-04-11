@@ -1,49 +1,41 @@
-
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import CommunityPage from "./pages/CommunityPage";
-import CreateCommunityPage from "./pages/CreateCommunityPage";
-import DiscoverPage from "./pages/DiscoverPage";
-import LoginPage from "./pages/LoginPage";
-import MembershipPage from "./pages/MembershipPage"; 
-import ProfilePage from "./pages/ProfilePage";
-import SettingsPage from "./pages/SettingsPage";
-import MainLayout from "./layouts/MainLayout";
-import { AuthProvider } from "./contexts/AuthContext";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/contexts/AuthContext";
+import MainLayout from "@/layouts/MainLayout";
+import LoginPage from "@/pages/LoginPage";
+import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
+import NotFound from "@/pages/NotFound";
+import HomePage from "@/pages/HomePage";
+import CommunityPage from "@/pages/CommunityPage";
+import ProfilePage from "@/pages/ProfilePage";
+import MembershipPage from "@/pages/MembershipPage";
+import TermsPage from "@/pages/TermsPage";
+import PrivacyPage from "@/pages/PrivacyPage";
 
-const queryClient = new QueryClient();
-
-const App = () => {
+function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route element={<MainLayout />}>
-                <Route path="/" element={<Index />} />
-                <Route path="/community/:id" element={<CommunityPage />} />
-                <Route path="/create-community" element={<CreateCommunityPage />} />
-                <Route path="/discover" element={<DiscoverPage />} />
-                <Route path="/membership" element={<MembershipPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/settings" element={<SettingsPage />} />
-              </Route>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+        <Router>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/*" element={<MainLayout />}>
+              <Route index element={<HomePage />} />
+              <Route path="community/:communityId" element={<CommunityPage />} />
+              <Route path="profile/:profileId" element={<ProfilePage />} />
+              <Route path="membership" element={<MembershipPage />} />
+              <Route path="terms" element={<TermsPage />} />
+              <Route path="privacy" element={<PrivacyPage />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Router>
+        <Toaster />
       </AuthProvider>
-    </QueryClientProvider>
+    </ThemeProvider>
   );
-};
+}
 
 export default App;

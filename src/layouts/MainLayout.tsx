@@ -1,4 +1,3 @@
-
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import CommunitySidebar from "@/components/CommunitySidebar";
@@ -11,6 +10,7 @@ import { ArrowLeft, Award, Crown, Home, ShieldCheck, CreditCard } from "lucide-r
 import { useAuth } from "@/contexts/AuthContext";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
+import { Progress } from "@/components/ui/progress";
 
 const MainLayout = () => {
   const navigate = useNavigate();

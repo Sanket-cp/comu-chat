@@ -3,17 +3,22 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Crown, ShieldCheck, Star, Trophy } from "lucide-react";
+import { Check, Crown, ShieldCheck, Star, Trophy, CreditCard, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { Progress } from "@/components/ui/progress";
+import { loadStripe } from "@stripe/stripe-js";
+
+// Initialize Stripe (use your publishable key from Stripe dashboard)
+const stripePromise = loadStripe("pk_test_51OvJwzDnc7RYKiVn5J19sFcvdUDGxcxbcA3KTwsExCYYn1c9r9ULr4Mzrm1WrWujJ91Cqh2YXrtrR2tZYPpcFOXl001I3zqKdY");
 
 const MembershipPage = () => {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [currentPlanToUpgrade, setCurrentPlanToUpgrade] = useState('');
   const [currentPriceToUpgrade, setCurrentPriceToUpgrade] = useState('');
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   
@@ -35,25 +40,75 @@ const MembershipPage = () => {
     setShowConfirmDialog(true);
   };
   
-  const confirmSubscription = () => {
-    // Here you would redirect to a payment processor like Stripe
-    toast({
-      title: "Processing payment",
-      description: `Redirecting to payment for ${currentPlanToUpgrade} plan (${currentPriceToUpgrade})`,
-    });
-    
-    // Simulate successful payment after 2 seconds
-    setTimeout(() => {
+  const confirmSubscription = async () => {
+    if (!isAuthenticated) {
       toast({
-        title: "Payment successful!",
-        description: `You are now subscribed to the ${currentPlanToUpgrade} plan!`,
+        title: "Authentication required",
+        description: "Please log in to continue with payment",
+        variant: "destructive"
       });
-      setSelectedPlan(currentPlanToUpgrade);
-      setShowConfirmDialog(false);
+      return;
+    }
+
+    setIsProcessingPayment(true);
+
+    try {
+      // In a real application with Supabase integration, you would call your checkout endpoint:
+      // const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+      //   body: { plan: currentPlanToUpgrade, priceId: getPriceId(currentPlanToUpgrade) }
+      // });
+
+      // For this demo, we'll simulate a successful redirect to Stripe
+      // Normally, you'd redirect to the checkout URL returned from your backend
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
       
-      // Reset usage counter after upgrading
-      localStorage.setItem("usagePercentage", "0");
-    }, 2000);
+      const stripe = await stripePromise;
+      if (!stripe) throw new Error("Failed to load Stripe");
+
+      // For demo purposes, redirect to a simulated Stripe checkout success page
+      toast({
+        title: "Redirecting to payment",
+        description: `Setting up your ${currentPlanToUpgrade} plan checkout...`,
+      });
+
+      // In a real implementation with Supabase+Stripe, you would:
+      // 1. Redirect to the Stripe session URL
+      // 2. Handle success/cancel URLs in your app
+
+      // Since we're simulating, show success after delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      handlePaymentSuccess();
+    } catch (error) {
+      console.error("Payment error:", error);
+      toast({
+        title: "Payment failed",
+        description: "There was an error processing your payment. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
+  const handlePaymentSuccess = () => {
+    toast({
+      title: "Payment successful!",
+      description: `You are now subscribed to the ${currentPlanToUpgrade} plan!`,
+    });
+    setSelectedPlan(currentPlanToUpgrade);
+    setShowConfirmDialog(false);
+    
+    // Reset usage counter after upgrading
+    localStorage.setItem("usagePercentage", "0");
+  };
+
+  // In a real app, this would map to your Stripe price IDs
+  const getPriceId = (plan: string) => {
+    switch (plan) {
+      case 'Premium': return 'price_premium_monthly';
+      case 'Ultimate': return 'price_ultimate_monthly';
+      default: return '';
+    }
   };
 
   const features = {
@@ -236,13 +291,13 @@ const MembershipPage = () => {
         </div>
       </div>
       
-      {/* Confirmation Dialog */}
+      {/* Confirmation Dialog with payment details */}
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Confirm Subscription</DialogTitle>
+            <DialogTitle>Complete Your Subscription</DialogTitle>
             <DialogDescription>
-              You're about to subscribe to the {currentPlanToUpgrade} plan for {currentPriceToUpgrade} per month.
+              You're subscribing to the {currentPlanToUpgrade} plan for {currentPriceToUpgrade} per month.
             </DialogDescription>
           </DialogHeader>
           
@@ -264,14 +319,36 @@ const MembershipPage = () => {
               ))}
             </ul>
           </div>
+
+          <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg mb-4 border border-gray-100 dark:border-gray-700">
+            <h4 className="font-medium mb-2 flex items-center text-sm">
+              <CreditCard className="h-4 w-4 text-community-purple mr-2" />
+              Payment Information
+            </h4>
+            <p className="text-sm text-muted-foreground">
+              You'll be securely redirected to Stripe to complete your payment. Your payment information is encrypted and never stored on our servers.
+            </p>
+          </div>
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)} disabled={isProcessingPayment}>
+              Cancel
+            </Button>
             <Button 
               onClick={confirmSubscription}
+              disabled={isProcessingPayment}
               className="bg-community-purple hover:bg-community-darkPurple"
             >
-              Confirm Payment
+              {isProcessingPayment ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                  Processing...
+                </>
+              ) : (
+                <>
+                  Proceed to Payment
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

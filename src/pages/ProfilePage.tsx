@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Award, Crown, Rocket, ShieldCheck } from "lucide-react";
+import { Award, Crown, Rocket, ShieldCheck, CreditCard } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 const ProfilePage = () => {
@@ -34,6 +34,13 @@ const ProfilePage = () => {
     toast({
       title: "Checking membership options",
       description: "Explore our premium plans to unlock more features!"
+    });
+  };
+
+  const goToPaymentHistory = () => {
+    toast({
+      title: "Coming soon",
+      description: "Payment history will be available in a future update."
     });
   };
 
@@ -101,7 +108,7 @@ const ProfilePage = () => {
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="mb-6">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Crown className="h-5 w-5 text-community-purple mr-2" />
@@ -166,6 +173,69 @@ const ProfilePage = () => {
                   className="w-full bg-community-purple hover:bg-community-darkPurple"
                 >
                   Upgrade to Premium
+                </Button>
+              </CardFooter>
+            </Card>
+
+            {/* New Payment Information Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <CreditCard className="h-5 w-5 text-community-purple mr-2" />
+                  Payment Information
+                </CardTitle>
+                <CardDescription>
+                  Your billing and payment details
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
+                  <h3 className="font-semibold mb-2">Payment Method</h3>
+                  {membershipPlan !== "Basic" ? (
+                    <div className="flex items-center space-x-3">
+                      <div className="h-8 w-12 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
+                        <CreditCard className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <p className="font-medium">•••• •••• •••• 4242</p>
+                        <p className="text-xs text-muted-foreground">Expires 12/2026</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No payment method on file. Add a payment method when you upgrade to a premium plan.
+                    </p>
+                  )}
+                </div>
+
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
+                  <h3 className="font-semibold mb-2">Billing History</h3>
+                  {membershipPlan !== "Basic" ? (
+                    <div className="text-sm">
+                      <p className="flex justify-between py-1 border-b">
+                        <span>Apr 10, 2025</span>
+                        <span className="font-medium">{membershipPlan === "Premium" ? "$9.99" : "$19.99"}</span>
+                      </p>
+                      <div className="flex justify-end mt-2">
+                        <Button variant="link" size="sm" className="h-auto p-0" onClick={goToPaymentHistory}>
+                          View all transactions
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No billing history available. Transaction history will appear after your first payment.
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  variant="outline"
+                  className="w-full"
+                  onClick={goToMembership}
+                >
+                  Manage Payment Methods
                 </Button>
               </CardFooter>
             </Card>

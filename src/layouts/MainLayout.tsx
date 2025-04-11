@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import SafetyButton from "@/components/SafetyButton";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ArrowLeft, Award, Crown, Home, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Award, Crown, Home, ShieldCheck, CreditCard } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
@@ -109,10 +109,22 @@ const MainLayout = () => {
                       <p className="text-sm text-muted-foreground">
                         Upgrade to Premium or Ultimate to unlock exclusive features and create more communities.
                       </p>
+                      
+                      {usagePercentage > 0 && (
+                        <div className="space-y-1 mt-2">
+                          <div className="flex justify-between text-xs">
+                            <span>Current Usage</span>
+                            <span className="font-medium">{usagePercentage}%</span>
+                          </div>
+                          <Progress value={usagePercentage} className="h-1.5" />
+                        </div>
+                      )}
+                      
                       <Button 
                         onClick={goToMembership}
                         className="w-full bg-community-purple hover:bg-community-darkPurple"
                       >
+                        <CreditCard className="h-4 w-4 mr-2" />
                         View Plans
                       </Button>
                     </div>
